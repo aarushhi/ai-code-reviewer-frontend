@@ -85,8 +85,26 @@ function Particles() {
   return <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }} />;
 }
 
+function SeverityBadges({ fullReview }) {
+  if (!fullReview) return null;
+  const hasCritical = fullReview.includes('🔴 CRITICAL') || fullReview.includes('CRITICAL:');
+  const hasWarning = fullReview.includes('🟡 WARNING') || fullReview.includes('WARNING:');
+  const hasSecurityIssue = fullReview.includes('Security Analysis') && !fullReview.includes('No security issues detected');
+  const securityClean = fullReview.includes('No security issues detected');
+
+  return (
+    <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      {hasCritical && <span style={{ fontSize: 11, background: '#2d0a0a', border: '1px solid #ef444433', borderRadius: 999, padding: '3px 10px', color: '#ef4444' }}>🔴 Critical Issues</span>}
+      {hasWarning && <span style={{ fontSize: 11, background: '#2d1f0a', border: '1px solid #f59e0b33', borderRadius: 999, padding: '3px 10px', color: '#f59e0b' }}>🟡 Warnings</span>}
+      {securityClean && <span style={{ fontSize: 11, background: '#0a1a2d', border: '1px solid #06b6d433', borderRadius: 999, padding: '3px 10px', color: '#06b6d4' }}>🛡️ Security Clean</span>}
+      {hasSecurityIssue && <span style={{ fontSize: 11, background: '#2d0a1a', border: '1px solid #ec489933', borderRadius: 999, padding: '3px 10px', color: '#ec4899' }}>⚠️ Security Issue</span>}
+    </div>
+  );
+}
+
 function ReviewCard({ review, index }) {
   const [visible, setVisible] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   useEffect(() => { setTimeout(() => setVisible(true), index * 150); }, []);
   const timeAgo = (date) => {
     const diff = Date.now() - new Date(date).getTime();
@@ -99,38 +117,52 @@ function ReviewCard({ review, index }) {
     <div style={{
       background: 'linear-gradient(135deg, #13131f 0%, #16161f 100%)',
       border: '1px solid #2a2a3a', borderRadius: 20, padding: 28,
-      display: 'flex', gap: 24, alignItems: 'center',
       transform: visible ? 'translateY(0)' : 'translateY(30px)',
       opacity: visible ? 1 : 0,
       transition: 'all 0.5s cubic-bezier(0.4,0,0.2,1)',
-      cursor: 'pointer', position: 'relative', overflow: 'hidden'
+      position: 'relative', overflow: 'hidden'
     }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = '#7c3aed'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 20px 40px rgba(124,58,237,0.15)'; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a3a'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-      onClick={() => review.pr_url && window.open(review.pr_url, '_blank')}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = '#7c3aed'; e.currentTarget.style.boxShadow = '0 20px 40px rgba(124,58,237,0.15)'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a3a'; e.currentTarget.style.boxShadow = 'none'; }}
     >
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, #7c3aed44, transparent)' }} />
-      <ScoreRing score={review.score} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: '#1e1030', border: '1px solid #7c3aed44', borderRadius: 999, padding: '3px 10px' }}>
-            <GitPullRequest size={11} color="#a78bfa" />
-            <span style={{ fontSize: 11, color: '#a78bfa' }}>{review.repo} #{review.pr_number}</span>
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+        <ScoreRing score={review.score} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: '#1e1030', border: '1px solid #7c3aed44', borderRadius: 999, padding: '3px 10px' }}>
+              <GitPullRequest size={11} color="#a78bfa" />
+              <span style={{ fontSize: 11, color: '#a78bfa' }}>{review.repo} #{review.pr_number}</span>
+            </div>
+            <span style={{ marginLeft: 'auto', fontSize: 12, color: '#4b4b6b' }}>{timeAgo(review.created_at)}</span>
           </div>
-          <span style={{ marginLeft: 'auto', fontSize: 12, color: '#4b4b6b' }}>{timeAgo(review.created_at)}</span>
-        </div>
-        <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 8, color: '#f0f0ff' }}>{review.pr_title}</div>
-        <div style={{ fontSize: 13, color: '#6b6b8b', lineHeight: 1.6 }}>{review.summary}</div>
-        <div style={{ marginTop: 14, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 11, background: '#1a1a2e', border: '1px solid #2a2a3a', borderRadius: 999, padding: '4px 12px', color: '#6b6b8b' }}>
-            {review.files_reviewed} file{review.files_reviewed > 1 ? 's' : ''} reviewed
-          </span>
-          <span style={{ fontSize: 11, background: '#0d1f14', border: '1px solid #22c55e33', borderRadius: 999, padding: '4px 12px', color: '#22c55e' }}>
-            ✓ Completed
-          </span>
-          <span style={{ fontSize: 11, background: '#1e1030', border: '1px solid #7c3aed44', borderRadius: 999, padding: '4px 12px', color: '#a78bfa' }}>
-            🤖 AI Reviewed
-          </span>
+          <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 8, color: '#f0f0ff' }}>{review.pr_title}</div>
+          <div style={{ fontSize: 13, color: '#6b6b8b', lineHeight: 1.6 }}>{review.summary}</div>
+          <SeverityBadges fullReview={review.full_review} />
+          <div style={{ marginTop: 14, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: 11, background: '#1a1a2e', border: '1px solid #2a2a3a', borderRadius: 999, padding: '4px 12px', color: '#6b6b8b' }}>
+              {review.files_reviewed} file{review.files_reviewed > 1 ? 's' : ''} reviewed
+            </span>
+            <span style={{ fontSize: 11, background: '#0d1f14', border: '1px solid #22c55e33', borderRadius: 999, padding: '4px 12px', color: '#22c55e' }}>✓ Completed</span>
+            <span style={{ fontSize: 11, background: '#1e1030', border: '1px solid #7c3aed44', borderRadius: 999, padding: '4px 12px', color: '#a78bfa' }}>🤖 AI Reviewed</span>
+            {review.pr_url && (
+              <a href={review.pr_url} target="_blank" rel="noreferrer" style={{ fontSize: 11, background: '#1a1a2e', border: '1px solid #2a2a3a', borderRadius: 999, padding: '4px 12px', color: '#6b6b8b', textDecoration: 'none', marginLeft: 'auto' }}>
+                View PR →
+              </a>
+            )}
+          </div>
+          {review.full_review && (
+            <div style={{ marginTop: 12 }}>
+              <button onClick={() => setExpanded(!expanded)} style={{ fontSize: 12, color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                {expanded ? '▲ Hide full review' : '▼ Show full review'}
+              </button>
+              {expanded && (
+                <div style={{ marginTop: 12, background: '#0d0d1a', border: '1px solid #2a2a3a', borderRadius: 12, padding: 16, fontSize: 12, color: '#8b8b9e', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+                  {review.full_review.replace(/## /g, '\n## ').replace(/\*\*/g, '')}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -237,7 +269,10 @@ export default function Dashboard() {
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: 60, color: '#4b4b6b' }}>Loading reviews...</div>
+            <div style={{ textAlign: 'center', padding: 60, color: '#4b4b6b' }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>⚡</div>
+              <div>Loading reviews...</div>
+            </div>
           ) : reviews.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 60, color: '#4b4b6b' }}>
               <div style={{ fontSize: 40, marginBottom: 12 }}>🤖</div>
