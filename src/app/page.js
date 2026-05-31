@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { GitPullRequest, Star, CheckCircle, Zap, Code2, TrendingUp, Shield, Activity, LogOut, LogIn } from 'lucide-react';
+import { GitPullRequest, Star, CheckCircle, Zap, TrendingUp, Shield, Activity, LogOut } from 'lucide-react';
 
 const BACKEND_URL = 'https://ai-code-reviewer-backend-cym0.onrender.com';
 
@@ -174,19 +174,12 @@ function LandingPage() {
         <p style={{ fontSize: 18, color: '#4b4b6b', marginBottom: 40, lineHeight: 1.6 }}>
           Automatically reviews code quality, detects security vulnerabilities, and posts feedback the moment a pull request is opened.
         </p>
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 48 }}>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 48, flexWrap: 'wrap' }}>
           {['🔴 Critical Issues', '🟡 Warnings', '🛡️ Security Scan', '📊 Quality Score'].map((f, i) => (
             <span key={i} style={{ fontSize: 12, background: '#13131f', border: '1px solid #2a2a3a', borderRadius: 999, padding: '6px 14px', color: '#6b6b8b' }}>{f}</span>
           ))}
         </div>
-        <a href={`${BACKEND_URL}/auth/github`} style={{
-          display: 'inline-flex', alignItems: 'center', gap: 10,
-          background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
-          color: 'white', textDecoration: 'none', padding: '14px 32px',
-          borderRadius: 999, fontSize: 16, fontWeight: 600,
-          boxShadow: '0 0 30px rgba(124,58,237,0.4)',
-          transition: 'all 0.2s'
-        }}>
+        <a href={`${BACKEND_URL}/auth/github`} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', color: 'white', textDecoration: 'none', padding: '14px 32px', borderRadius: 999, fontSize: 16, fontWeight: 600, boxShadow: '0 0 30px rgba(124,58,237,0.4)' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
           Continue with GitHub
         </a>
@@ -205,7 +198,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     setMounted(true);
-    // Check if user just logged in via URL params
     const params = new URLSearchParams(window.location.search);
     const loginParam = params.get('login');
     const userParam = params.get('user');
@@ -250,6 +242,7 @@ export default function Dashboard() {
       <Particles />
       <div style={{ position: 'fixed', top: -200, left: -200, width: 600, height: 600, background: 'radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
+        {/* Header with nav */}
         <div style={{ borderBottom: '1px solid #1a1a2e', padding: '18px 48px', display: 'flex', alignItems: 'center', gap: 14, backdropFilter: 'blur(20px)', background: 'rgba(7,7,15,0.8)', position: 'sticky', top: 0, zIndex: 10 }}>
           <div style={{ width: 40, height: 40, background: 'linear-gradient(135deg, #7c3aed, #06b6d4)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(124,58,237,0.4)' }}>
             <Zap size={20} color="white" />
@@ -259,6 +252,21 @@ export default function Dashboard() {
             <div style={{ fontSize: 11, color: '#4b4b6b' }}>Powered by Gemini AI</div>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              {[
+                { href: '/', label: 'Dashboard' },
+                { href: '/reviews', label: 'Reviews' },
+                { href: '/stats', label: 'Stats' },
+                { href: '/settings', label: 'Settings' },
+              ].map(link => (
+                <a key={link.href} href={link.href} style={{ fontSize: 13, color: '#6b6b8b', textDecoration: 'none', padding: '6px 12px', borderRadius: 8 }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#f0f0ff'; e.currentTarget.style.background = '#1a1a2e'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = '#6b6b8b'; e.currentTarget.style.background = 'none'; }}>
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+            <div style={{ width: 1, height: 20, background: '#2a2a3a' }} />
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#0d1f14', border: '1px solid #22c55e33', borderRadius: 999, padding: '6px 14px' }}>
               <div style={{ width: 7, height: 7, background: '#22c55e', borderRadius: '50%', boxShadow: '0 0 6px #22c55e' }} />
               <span style={{ fontSize: 12, color: '#22c55e', fontWeight: 500 }}>Bot Active</span>
@@ -303,7 +311,10 @@ export default function Dashboard() {
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <h2 style={{ fontSize: 22, fontWeight: 800, color: '#f0f0ff' }}>Recent Reviews</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#4b4b6b' }}><Activity size={13} />{stats.total} total</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#4b4b6b' }}><Activity size={13} />{stats.total} total</div>
+              <a href="/reviews" style={{ fontSize: 13, color: '#7c3aed', textDecoration: 'none', background: '#1e1030', border: '1px solid #7c3aed44', borderRadius: 999, padding: '6px 14px' }}>View all →</a>
+            </div>
           </div>
 
           {loading ? (
@@ -319,7 +330,12 @@ export default function Dashboard() {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {reviews.map((review, i) => <ReviewCard key={review._id} review={review} index={i} />)}
+              {reviews.slice(0, 5).map((review, i) => <ReviewCard key={review._id} review={review} index={i} />)}
+              {reviews.length > 5 && (
+                <a href="/reviews" style={{ textAlign: 'center', padding: '16px', color: '#7c3aed', textDecoration: 'none', background: '#1e1030', border: '1px solid #7c3aed44', borderRadius: 16, fontSize: 14 }}>
+                  View all {stats.total} reviews →
+                </a>
+              )}
             </div>
           )}
         </div>
